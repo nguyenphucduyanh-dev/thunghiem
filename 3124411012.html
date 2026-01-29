@@ -1,0 +1,115 @@
+<input type="radio" name="gender" value="Nam" checked onclick="updateJobs()"> Nam
+                    <input type="radio" name="gender" value="Nu" onclick="updateJobs()"> Nữ
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Nghề Nghiệp Liên Quan</td>
+                <td>
+                    <select id="job">
+                        <option value="">[Chọn Một Nghề]</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr><td colspan="2" class="section-title">Sở Thích</td></tr>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    <input type="checkbox" name="hobby" value="Am Nhac"> Âm Nhạc
+                    <input type="checkbox" name="hobby" value="Du Lich"> Du Lịch
+                    <input type="checkbox" name="hobby" value="Nghien Cuu"> Nghiên Cứu
+                    <input type="checkbox" name="hobby" value="Kinh Doanh"> Kinh Doanh
+                </td>
+            </tr>
+        </table>
+
+        <div class="buttons">
+            <button type="button" onclick="validateForm()">Đăng Ký</button>
+            <button type="reset" onclick="location.reload()">Xóa</button>
+        </div>
+    </form>
+</div>
+<script>
+    
+    window.onload = updateJobs;
+
+    
+    function toggleSecretAnswer() {
+        const question = document.getElementById('secretQuestion').value;
+        const answerInput = document.getElementById('secretAnswer');
+        if (question !== "") {
+            answerInput.disabled = false;
+        } else {
+            answerInput.disabled = true;
+            answerInput.value = "";
+        }
+    }
+
+    
+    function updateJobs() {
+        const gender = document.querySelector('input[name="gender"]:checked').value;
+        const jobSelect = document.getElementById('job');
+        jobSelect.innerHTML = '<option value="">[Chọn Một Nghề]</option>';
+        
+        const jobs = (gender === 'Nam') 
+            ? ['Kỹ sư', 'Lập trình viên', 'Phi công'] 
+            : ['Giáo viên', 'Kế toán', 'Bác sĩ'];
+
+        jobs.forEach(job => {
+            let opt = document.createElement('option');
+            opt.value = job;
+            opt.innerHTML = job;
+            jobSelect.appendChild(opt);
+        });
+    }
+
+    
+    function validateForm() {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value;
+        const repass = document.getElementById('repassword').value;
+        const question = document.getElementById('secretQuestion').value;
+        const answer = document.getElementById('secretAnswer').value.trim();
+        const dob = document.getElementById('dob').value;
+        const hobbies = document.querySelectorAll('input[name="hobby"]:checked');
+
+        
+        if (user === "" || pass === "" || repass === "") {
+            alert("Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu!");
+            return;
+        }
+
+        
+        if (pass.length < 6) {
+            alert("Mật khẩu phải có ít nhất 6 kí tự!");
+            return;
+        }
+
+        
+        if (pass !== repass) {
+            alert("Mật khẩu gõ lại không khớp!");
+            return;
+        }
+
+        
+        if (question !== "" && answer === "") {
+            alert("Bạn phải nhập câu trả lời cho câu hỏi bí mật!");
+            return;
+        }
+
+        if (!dob) {
+            alert("Vui lòng chọn ngày sinh!");
+            return;
+        }
+
+        
+        if (hobbies.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 sở thích!");
+return;
+        }
+
+        
+        alert("Đăng ký thành công! Thông tin đã được gửi về máy chủ.");
+    }
+</script>
+</body>
+</html>
