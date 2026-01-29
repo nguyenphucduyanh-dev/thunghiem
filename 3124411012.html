@@ -1,3 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký Người Dùng</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 600px; margin: 20px auto; border: 1px solid #ccc; }
+        .header { background-color: #003399; color: white; text-align: center; padding: 10px; font-weight: bold; }
+        table { width: 100%; padding: 10px; }
+        td { padding: 5px; }
+        .label { text-align: right; width: 40%; }
+        .required { color: red; }
+        .section-title { font-weight: bold; padding-top: 15px; border-bottom: 1px solid #eee; }
+        .buttons { text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">Đăng Ký Người Dùng</div>
+    <form id="registerForm">
+        <table>
+            <tr>
+                <td class="label">Tên Đăng Nhập</td>
+                <td><input type="text" id="username"> <span class="required">*</span></td>
+            </tr>
+            <tr>
+                <td class="label">Mật Khẩu<br><small>(Tối Thiểu 6 Kí Tự)</small></td>
+                <td><input type="password" id="password"> <span class="required">*</span></td>
+            </tr>
+            <tr>
+                <td class="label">Gõ Lại Mật Khẩu</td>
+                <td><input type="password" id="repassword"> <span class="required">*</span></td>
+            </tr>
+
+            <tr><td colspan="2" class="section-title">Nhập Thông Tin Để Lấy Lại Mật Khẩu Khi Quên</td></tr>
+            <tr>
+                <td class="label">Câu Hỏi Bí Mật</td>
+                <td>
+                    <select id="secretQuestion" onchange="toggleSecretAnswer()">
+                        <option value="">[Chọn Một Câu Hỏi...]</option>
+                        <option value="1">Tên con vật đầu tiên của bạn?</option>
+                        <option value="2">Trường tiểu học của bạn tên gì?</option>
+                        <option value="3">Sở thích lớn nhất của bạn?</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Trả Lời</td>
+                <td><input type="text" id="secretAnswer" disabled></td>
+            </tr>
+
+            <tr><td colspan="2" class="section-title">Thông Tin Cá Nhân</td></tr>
+            <tr>
+                <td class="label">Họ Và Chu Lót</td>
+                <td><input type="text" id="firstName"></td>
+            </tr>
+            <tr>
+                <td class="label">Tên</td>
+                <td><input type="text" id="lastName"></td>
+            </tr>
+            <tr>
+                <td class="label">Ngày Sinh</td>
+                <td><input type="date" id="dob"></td>
+            </tr>
+            <tr>
+                <td class="label">Giới Tính</td>
+                <td>
 <input type="radio" name="gender" value="Nam" checked onclick="updateJobs()"> Nam
                     <input type="radio" name="gender" value="Nu" onclick="updateJobs()"> Nữ
                 </td>
