@@ -3,95 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Calendar - March 2025</title>
+    <title>Cat Font Calendar 2025</title>
     <style>
+        :root {
+            --border-color: #a0a0a0;
+            --header-bg: #f2f2f2;
+        }
+
         body {
-            font-family: 'Times New Roman', serif;
+            font-family: "Times New Roman", Times, serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #fff;
-            padding: 20px;
+            padding: 40px;
+            color: #333;
         }
 
-        /* Header chỉ dẫn */
-        .header-guide {
+        /* Phần text hướng dẫn phía trên */
+        .top-nav-text {
             display: flex;
             justify-content: space-between;
-            width: 800px;
-            margin-bottom: 5px;
-            font-size: 14px;
+            width: 90%;
+            max-width: 900px;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
 
-        .line {
-            width: 800px;
+        .divider {
+            width: 90%;
+            max-width: 900px;
             height: 2px;
-            background-color: #b0c4de;
-            margin-bottom: 20px;
+            background-color: #cbdcf8;
+            margin-bottom: 25px;
         }
 
-        /* Calendar Container */
+        /* Bảng lịch */
         .calendar-table {
             border-collapse: collapse;
-            width: 800px;
-            table-layout: fixed; /* Giữ các ô bằng nhau */
+            width: 90%;
+            max-width: 900px;
+            border: 2px solid var(--border-color);
         }
 
-        .calendar-table th, .calendar-table td {
-            border: 1px solid #999;
-            text-align: center;
-            height: 80px;
-            vertical-align: middle;
-        }
-
-        /* Điều hướng tháng */
-        .nav-header {
-            background-color: #f8f8f8;
-        }
-        
-        .btn-nav {
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 20px;
-            width: 100px;
-        }
-
-        .month-title {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        /* Tên thứ */
-        .days-header th {
-            font-style: italic;
-            font-size: 18px;
+        /* Header điều hướng */
+        .nav-row {
+            background-color: var(--header-bg);
             height: 50px;
         }
 
-        /* Ảnh số mèo */
-        .cat-number {
-            height: 60px; /* Điều chỉnh kích thước ảnh số mèo */
+        .nav-btn {
+            width: 80px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+        }
+
+        .month-year {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Tên thứ */
+        .weekday-row th {
+            border: 1px solid var(--border-color);
+            padding: 15px 0;
+            font-style: italic;
+            font-size: 20px;
+            width: 14.28%;
+        }
+
+        /* Ô chứa số */
+        .calendar-table td {
+            border: 1px solid var(--border-color);
+            height: 100px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 5px;
+        }
+
+        /* Style cho số hình mèo */
+        .cat-num {
+            max-height: 80px;
+            max-width: 90%;
             object-fit: contain;
+            /* Hiệu ứng đổ bóng nhẹ cho giống hình mẫu */
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+        }
+
+        /* Responsive cho di động */
+        @media (max-width: 600px) {
+            .calendar-table td { height: 60px; }
+            .weekday-row th { font-size: 12px; }
+            .month-year { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-guide">
+    <div class="top-nav-text">
         <span>Tháng trước</span>
-        <span style="text-align: center;">Mặc định tháng<br>hiện tại</span>
+        <span style="text-align:center">Mặc định tháng<br>hiện tại</span>
         <span>Tháng sau</span>
     </div>
-    <div class="line"></div>
+    
+    <div class="divider"></div>
 
     <table class="calendar-table">
         <thead>
-            <tr class="nav-header">
-                <th class="btn-nav">&lt;</th>
-                <th colspan="5" class="month-title" id="monthDisplay">March 2025</th>
-                <th class="btn-nav">&gt;</th>
+            <tr class="nav-row">
+                <th class="nav-btn">&lt;</th>
+                <th colspan="5" class="month-year">March 2025</th>
+                <th class="nav-btn">&gt;</th>
             </tr>
-            <tr class="days-header">
+            <tr class="weekday-row">
                 <th>Monday</th>
                 <th>Tuesday</th>
                 <th>Wednesday</th>
@@ -101,50 +127,47 @@
                 <th>Sunday</th>
             </tr>
         </thead>
-        <tbody id="calendarBody">
+        <tbody id="calendar-body">
             </tbody>
     </table>
 
     <script>
-        function generateCalendar() {
-            const tbody = document.getElementById('calendarBody');
-            const year = 2025;
-            const month = 2; 
-            
-           
-            let firstDay = new Date(year, month, 1).getDay();
-            
-            let startColumn = (firstDay === 0) ? 6 : firstDay - 1;
-            
+        const calendarBody = document.getElementById('calendar-body');
+        
+        
+        const totalDays = 31;
+        const startDayIndex = 5; 
+
+        function renderCalendar() {
             let date = 1;
-            const daysInMonth = 31;
+            let html = '';
 
             for (let i = 0; i < 6; i++) { 
-                let row = document.createElement('tr');
-                
+                html += '<tr>';
                 for (let j = 0; j < 7; j++) {
-                    let cell = document.createElement('td');
-                    
-                    if (i === 0 && j < startColumn) {
-                   
-                        cell.innerHTML = "";
-                    } else if (date > daysInMonth) {
-                     
-                        cell.innerHTML = "";
-                    } else {
-                       
-                        cell.innerHTML = `<img src="images/cat_${date}.png" alt="${date}" class="cat-number" onerror="this.replaceWith('${date}')">`;
+                    if (i === 0 && j < startDayIndex) {
+                        html += '<td></td>'; 
+                    } else if (date <= totalDays) {
+                        
+                        html += `
+                            <td>
+                                <img src="images/cat-num-${date}.png" 
+                                     alt="${date}" 
+                                     class="cat-num"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<b style=\'font-size:30px; color:#e67e22\'>${date}</b>'">
+                            </td>`;
                         date++;
+                    } else {
+                        html += '<td></td>'; 
                     }
-                    row.appendChild(cell);
                 }
-                tbody.appendChild(row);
-                if (date > daysInMonth) break;
+                html += '</tr>';
+                if (date > totalDays) break;
             }
+            calendarBody.innerHTML = html;
         }
 
-        
-        generateCalendar();
+        renderCalendar();
     </script>
 </body>
 </html>
