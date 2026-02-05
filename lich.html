@@ -2,144 +2,89 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Cat Font Calendar 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghép Lịch Mèo</title>
     <style>
         body {
-            font-family: "Times New Roman", serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-        }
-
-        /* Header giống hình mẫu */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            width: 800px;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        .blue-line {
-            width: 800px;
-            height: 2px;
-            background-color: #cbdcf8;
-            margin-bottom: 20px;
-        }
-
-        /* Bảng lịch */
-        table {
-            border-collapse: collapse;
-            width: 800px;
-            border: 1px solid #999;
-        }
-        th, td {
-            border: 1px solid #999;
-            width: 114px; /* 800 / 7 */
-            height: 80px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        /* Header Tháng */
-        .month-header {
             background-color: #f0f0f0;
-            font-size: 22px;
-            font-weight: bold;
+            padding: 20px;
+            font-family: sans-serif;
         }
-        .nav-btn { width: 60px; cursor: pointer; }
-
-        /* Tên thứ (In nghiêng) */
-        .day-name { font-style: italic; font-size: 18px; }
-
-        /* Container cho số mèo */
-        .cat-num-container canvas {
-            max-height: 70px;
-            max-width: 90%;
+        #resultCanvas {
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: white;
+            max-width: 100%;
+        }
+        .status {
+            margin-bottom: 10px;
+            color: #666;
         }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <span>Tháng trước</span>
-        <span style="text-align:center">Mặc định tháng<br>hiện tại</span>
-        <span>Tháng sau</span>
-    </div>
-    <div class="blue-line"></div>
-
-    <table>
-        <thead>
-            <tr class="month-header">
-                <th class="nav-btn">&lt;</th>
-                <th colspan="5">March 2025</th>
-                <th class="nav-btn">&gt;</th>
-            </tr>
-            <tr class="day-name">
-                <th>Monday</th><th>Tuesday</th><th>Wednesday</th>
-                <th>Thursday</th><th>Friday</th><th>Saturday</th><th>Sunday</th>
-            </tr>
-        </thead>
-        <tbody id="calendarBody"></tbody>
-    </table>
+    <div class="status" id="status">Đang tải và ghép ảnh...</div>
+    
+    <canvas id="resultCanvas"></canvas>
 
     <script>
+        const canvas = document.getElementById('resultCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status');
+
         
-        const imgSource = 'hinhMinhHoaJsCalendar.jpg'; 
-        const ROWS = 5;
-        const COLS = 7;
+        const imgHeaderSrc = 'hinh1.png'; 
+        const imgBodySrc = 'cat.png';     
 
-        function createCalendar() {
-            const tbody = document.getElementById('calendarBody');
-            const totalDays = 31;
-            const startCol = 5; 
-            
-            let dateCounter = 1;
-            let currentImgIndex = 0; 
+        const imgHeader = new Image();
+        const imgBody = new Image();
 
-            const img = new Image();
-            img.src = imgSource;
-            img.onload = () => {
-                
-                const cellW = img.width / 7;
-                const cellH = (img.height * 0.75) / 5; 
-                const startY = img.height * 0.25; 
+        let loadedCount = 0;
 
-                for (let r = 0; r < 6; r++) {
-                    let row = document.createElement('tr');
-                    for (let c = 0; c < 7; c++) {
-                        let td = document.createElement('td');
-                        
-                        if ((r === 0 && c < startCol) || dateCounter > totalDays) {
-                            td.innerHTML = "";
-                        } else {
-                            
-                            const canvas = document.createElement('canvas');
-                            canvas.width = cellW;
-                            canvas.height = cellH;
-                            const ctx = canvas.getContext('2d');
-                            
-                           
-                            let sourceX = (currentImgIndex % 7) * cellW;
-                            let sourceY = startY + Math.floor(currentImgIndex / 7) * cellH;
-                            
-                            ctx.drawImage(img, sourceX, sourceY, cellW, cellH, 0, 0, cellW, cellH);
-                            
-                            td.className = "cat-num-container";
-                            td.appendChild(canvas);
-                            
-                            dateCounter++;
-                            currentImgIndex++;
-                        }
-                        row.appendChild(td);
-                    }
-                    tbody.appendChild(row);
-                    if (dateCounter > totalDays) break;
-                }
-            };
+        
+        function checkAndDraw() {
+            loadedCount++;
+            if (loadedCount === 2) {
+                drawImages();
+            }
         }
 
-        createCalendar();
+        imgHeader.onload = checkAndDraw;
+        imgBody.onload = checkAndDraw;
+        
+        
+        imgHeader.src = imgHeaderSrc;
+        imgBody.src = imgBodySrc;
+
+        function drawImages() {
+            
+            const maxWidth = Math.max(imgHeader.width, imgBody.width);
+            
+            const totalHeight = imgHeader.height + imgBody.height;
+
+            canvas.width = maxWidth;
+            canvas.height = totalHeight;
+
+            
+            const xHeader = (maxWidth - imgHeader.width) / 2;
+            ctx.drawImage(imgHeader, xHeader, 0);
+
+            
+            const xBody = (maxWidth - imgBody.width) / 2;
+            ctx.drawImage(imgBody, xBody, imgHeader.height);
+
+            statusText.innerText = "Đã ghép ảnh thành công!";
+        }
+
+        
+        imgHeader.onerror = imgBody.onerror = () => {
+            statusText.innerText = "Lỗi: Không tìm thấy file ảnh. Hãy đảm bảo hinh1.png và cat.png nằm cùng thư mục.";
+            statusText.style.color = "red";
+        };
     </script>
 </body>
 </html>
