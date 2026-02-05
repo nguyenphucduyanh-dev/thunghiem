@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Calendar - March 2025</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        /* Header chỉ dẫn */
+        .header-guide {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .line {
+            width: 800px;
+            height: 2px;
+            background-color: #b0c4de;
+            margin-bottom: 20px;
+        }
+
+        /* Calendar Container */
+        .calendar-table {
+            border-collapse: collapse;
+            width: 800px;
+            table-layout: fixed; /* Giữ các ô bằng nhau */
+        }
+
+        .calendar-table th, .calendar-table td {
+            border: 1px solid #999;
+            text-align: center;
+            height: 80px;
+            vertical-align: middle;
+        }
+
+        /* Điều hướng tháng */
+        .nav-header {
+            background-color: #f8f8f8;
+        }
+        
+        .btn-nav {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 20px;
+            width: 100px;
+        }
+
+        .month-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Tên thứ */
+        .days-header th {
+            font-style: italic;
+            font-size: 18px;
+            height: 50px;
+        }
+
+        /* Ảnh số mèo */
+        .cat-number {
+            height: 60px; /* Điều chỉnh kích thước ảnh số mèo */
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-guide">
+        <span>Tháng trước</span>
+        <span style="text-align: center;">Mặc định tháng<br>hiện tại</span>
+        <span>Tháng sau</span>
+    </div>
+    <div class="line"></div>
+
+    <table class="calendar-table">
+        <thead>
+            <tr class="nav-header">
+                <th class="btn-nav">&lt;</th>
+                <th colspan="5" class="month-title" id="monthDisplay">March 2025</th>
+                <th class="btn-nav">&gt;</th>
+            </tr>
+            <tr class="days-header">
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody id="calendarBody">
+            </tbody>
+    </table>
+
+    <script>
+        function generateCalendar() {
+            const tbody = document.getElementById('calendarBody');
+            const year = 2025;
+            const month = 2; 
+            
+           
+            let firstDay = new Date(year, month, 1).getDay();
+            
+            let startColumn = (firstDay === 0) ? 6 : firstDay - 1;
+            
+            let date = 1;
+            const daysInMonth = 31;
+
+            for (let i = 0; i < 6; i++) { 
+                let row = document.createElement('tr');
+                
+                for (let j = 0; j < 7; j++) {
+                    let cell = document.createElement('td');
+                    
+                    if (i === 0 && j < startColumn) {
+                   
+                        cell.innerHTML = "";
+                    } else if (date > daysInMonth) {
+                     
+                        cell.innerHTML = "";
+                    } else {
+                       
+                        cell.innerHTML = `<img src="images/cat_${date}.png" alt="${date}" class="cat-number" onerror="this.replaceWith('${date}')">`;
+                        date++;
+                    }
+                    row.appendChild(cell);
+                }
+                tbody.appendChild(row);
+                if (date > daysInMonth) break;
+            }
+        }
+
+        
+        generateCalendar();
+    </script>
+</body>
+</html>
