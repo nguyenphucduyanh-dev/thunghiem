@@ -2,172 +2,144 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Font Calendar 2025</title>
     <style>
-        :root {
-            --border-color: #a0a0a0;
-            --header-bg: #f2f2f2;
-        }
-
         body {
-            font-family: "Times New Roman", Times, serif;
+            font-family: "Times New Roman", serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px;
-            color: #333;
+            padding: 20px;
         }
 
-        /* Phần text hướng dẫn phía trên */
-        .top-nav-text {
+        /* Header giống hình mẫu */
+        .top-nav {
             display: flex;
             justify-content: space-between;
-            width: 90%;
-            max-width: 900px;
-            margin-bottom: 10px;
-            font-size: 16px;
+            width: 800px;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
-
-        .divider {
-            width: 90%;
-            max-width: 900px;
+        .blue-line {
+            width: 800px;
             height: 2px;
             background-color: #cbdcf8;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         /* Bảng lịch */
-        .calendar-table {
+        table {
             border-collapse: collapse;
-            width: 90%;
-            max-width: 900px;
-            border: 2px solid var(--border-color);
+            width: 800px;
+            border: 1px solid #999;
         }
-
-        /* Header điều hướng */
-        .nav-row {
-            background-color: var(--header-bg);
-            height: 50px;
-        }
-
-        .nav-btn {
-            width: 80px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            border: 1px solid var(--border-color);
-        }
-
-        .month-year {
-            font-size: 26px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        /* Tên thứ */
-        .weekday-row th {
-            border: 1px solid var(--border-color);
-            padding: 15px 0;
-            font-style: italic;
-            font-size: 20px;
-            width: 14.28%;
-        }
-
-        /* Ô chứa số */
-        .calendar-table td {
-            border: 1px solid var(--border-color);
-            height: 100px;
+        th, td {
+            border: 1px solid #999;
+            width: 114px; /* 800 / 7 */
+            height: 80px;
             text-align: center;
             vertical-align: middle;
-            padding: 5px;
         }
 
-        /* Style cho số hình mèo */
-        .cat-num {
-            max-height: 80px;
+        /* Header Tháng */
+        .month-header {
+            background-color: #f0f0f0;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .nav-btn { width: 60px; cursor: pointer; }
+
+        /* Tên thứ (In nghiêng) */
+        .day-name { font-style: italic; font-size: 18px; }
+
+        /* Container cho số mèo */
+        .cat-num-container canvas {
+            max-height: 70px;
             max-width: 90%;
-            object-fit: contain;
-            /* Hiệu ứng đổ bóng nhẹ cho giống hình mẫu */
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
-        }
-
-        /* Responsive cho di động */
-        @media (max-width: 600px) {
-            .calendar-table td { height: 60px; }
-            .weekday-row th { font-size: 12px; }
-            .month-year { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-nav-text">
+    <div class="top-nav">
         <span>Tháng trước</span>
         <span style="text-align:center">Mặc định tháng<br>hiện tại</span>
         <span>Tháng sau</span>
     </div>
-    
-    <div class="divider"></div>
+    <div class="blue-line"></div>
 
-    <table class="calendar-table">
+    <table>
         <thead>
-            <tr class="nav-row">
+            <tr class="month-header">
                 <th class="nav-btn">&lt;</th>
-                <th colspan="5" class="month-year">March 2025</th>
+                <th colspan="5">March 2025</th>
                 <th class="nav-btn">&gt;</th>
             </tr>
-            <tr class="weekday-row">
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-                <th>Sunday</th>
+            <tr class="day-name">
+                <th>Monday</th><th>Tuesday</th><th>Wednesday</th>
+                <th>Thursday</th><th>Friday</th><th>Saturday</th><th>Sunday</th>
             </tr>
         </thead>
-        <tbody id="calendar-body">
-            </tbody>
+        <tbody id="calendarBody"></tbody>
     </table>
 
     <script>
-        const calendarBody = document.getElementById('calendar-body');
         
-        
-        const totalDays = 31;
-        const startDayIndex = 5; 
+        const imgSource = 'hinhMinhHoaJsCalendar.jpg'; 
+        const ROWS = 5;
+        const COLS = 7;
 
-        function renderCalendar() {
-            let date = 1;
-            let html = '';
+        function createCalendar() {
+            const tbody = document.getElementById('calendarBody');
+            const totalDays = 31;
+            const startCol = 5; 
+            
+            let dateCounter = 1;
+            let currentImgIndex = 0; 
 
-            for (let i = 0; i < 6; i++) { 
-                html += '<tr>';
-                for (let j = 0; j < 7; j++) {
-                    if (i === 0 && j < startDayIndex) {
-                        html += '<td></td>'; 
-                    } else if (date <= totalDays) {
+            const img = new Image();
+            img.src = imgSource;
+            img.onload = () => {
+                
+                const cellW = img.width / 7;
+                const cellH = (img.height * 0.75) / 5; 
+                const startY = img.height * 0.25; 
+
+                for (let r = 0; r < 6; r++) {
+                    let row = document.createElement('tr');
+                    for (let c = 0; c < 7; c++) {
+                        let td = document.createElement('td');
                         
-                        html += `
-                            <td>
-                                <img src="images/cat-num-${date}.png" 
-                                     alt="${date}" 
-                                     class="cat-num"
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<b style=\'font-size:30px; color:#e67e22\'>${date}</b>'">
-                            </td>`;
-                        date++;
-                    } else {
-                        html += '<td></td>'; 
+                        if ((r === 0 && c < startCol) || dateCounter > totalDays) {
+                            td.innerHTML = "";
+                        } else {
+                            
+                            const canvas = document.createElement('canvas');
+                            canvas.width = cellW;
+                            canvas.height = cellH;
+                            const ctx = canvas.getContext('2d');
+                            
+                           
+                            let sourceX = (currentImgIndex % 7) * cellW;
+                            let sourceY = startY + Math.floor(currentImgIndex / 7) * cellH;
+                            
+                            ctx.drawImage(img, sourceX, sourceY, cellW, cellH, 0, 0, cellW, cellH);
+                            
+                            td.className = "cat-num-container";
+                            td.appendChild(canvas);
+                            
+                            dateCounter++;
+                            currentImgIndex++;
+                        }
+                        row.appendChild(td);
                     }
+                    tbody.appendChild(row);
+                    if (dateCounter > totalDays) break;
                 }
-                html += '</tr>';
-                if (date > totalDays) break;
-            }
-            calendarBody.innerHTML = html;
+            };
         }
 
-        renderCalendar();
+        createCalendar();
     </script>
 </body>
 </html>
