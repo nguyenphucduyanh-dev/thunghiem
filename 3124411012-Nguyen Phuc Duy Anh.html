@@ -2,45 +2,43 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng ký Tiêm chủng</title>
+    <title>Đăng ký tiêm chủng</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .box { max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ccc; }
-        .hidden { display: none; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+        .wrapper { max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ccc; }
         .form-group { margin-bottom: 15px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; }
-        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; margin-top: 10px; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .msg { padding: 10px; margin-top: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; margin-top: 10px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        .hidden { display: none; }
+        .msg { padding: 10px; margin-top: 10px; background: #e9ecef; border: 1px solid #dee2e6; }
     </style>
 </head>
 <body>
 
-<div class="box" id="app">
-    <h3>Đăng ký Tiêm chủng</h3>
-    <div class="form-group">
-        Họ tên: <input type="text" id="name">
-    </div>
+<div class="wrapper" id="form-container">
+    <h2>I. Thông tin cá nhân</h2>
+    <div class="form-group">Họ và Tên: * <input type="text" id="fullname"></div>
+    <h2>II. Thông tin tiêm chủng</h2>
     <div class="form-group">
         Loại Vaccine: 
         <select id="vaccine">
-            <option value="">-- Chọn --</option>
-            <option value="cum" data-price="350000" data-doses="1">Cúm mùa</option>
-            <option value="thuydau" data-price="800000" data-doses="2">Thủy đậu</option>
-            <option value="hpv" data-price="2500000" data-doses="3">HPV - Gardasil 9</option>
+            <option value="">-- Chọn Vaccine --</option>
+            <option value="cum" data-type="dinhky">Cúm mùa</option>
+            <option value="hpv" data-type="lieutrinh" data-doses="3">HPV - Gardasil 9</option>
         </select>
     </div>
-    <div class="form-group">
-        Đăng ký mũi: <select id="mui" disabled><option>-- Chọn --</option></select>
+    <div class="form-group">Đăng ký mũi: <select id="mui" disabled><option>-- Chọn Mũi --</option></select></div>
+    <div class="form-group">Ngày dự kiến tiêm: <input type="date" id="date-inject" disabled></div>
+    
+    <div id="check-code" class="hidden">
+        Nhập mã mũi tiêm trước đó: <input type="text" id="prev-code" placeholder="VD: M1-ABCDEF">
     </div>
-    <div id="check-area" class="hidden">
-        Mã mũi trước đó: <input type="text" id="prev-code" placeholder="VD: M1-A7BC97">
-    </div>
-    <div class="form-group">
-        Ngày dự kiến tiêm: <input type="date" id="date-inject" disabled>
-    </div>
-    <button id="btn-calc" disabled>Tính tiền thanh toán</button>
-    <div id="result" class="msg hidden"></div>
+
+    <button id="btn-price" disabled>Tính tiền thanh toán</button>
+    <div id="price-result" class="msg hidden"></div>
+    
+    <div class="form-group"><input type="checkbox" id="confirm"> Tôi đồng ý cung cấp thông tin</div>
     <button id="btn-submit" disabled>Gửi thông tin đăng ký</button>
 </div>
 
@@ -48,76 +46,37 @@
     const vSelect = document.getElementById('vaccine');
     const muiSelect = document.getElementById('mui');
     const dateInput = document.getElementById('date-inject');
-    const checkArea = document.getElementById('check-area');
-    
-    // 1. Chọn Vaccine sinh Mũi
+
+    // 1. Logic chọn Vaccine
     vSelect.onchange = () => {
-        const option = vSelect.options[vSelect.selectedIndex];
-        muiSelect.innerHTML = '<option value="">-- Chọn --</option>';
-        if(option.value) {
-            for(let i=1; i<=option.dataset.doses; i++) muiSelect.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
-            muiSelect.disabled = false;
+        muiSelect.disabled = !vSelect.value;
+        muiSelect.innerHTML = '<option>-- Chọn Mũi --</option>';
+        if(vSelect.value === 'hpv') {
+            for(let i=1; i<=3; i++) muiSelect.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
         }
     };
 
-    // 2. Chọn Mũi -> Xử lý hiển thị
+    
     muiSelect.onchange = () => {
         dateInput.disabled = false;
-        checkArea.classList.toggle('hidden', muiSelect.value == 1);
-        document.getElementById('btn-calc').disabled = false;
+        document.getElementById('check-code').classList.toggle('hidden', muiSelect.value == 1);
+        document.getElementById('btn-price').disabled = false;
     };
 
-    // 3. Hàm sinh mã ngẫu nhiên
-    const genCode = (mui) => {
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let rand = Array.from({length: 6}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-        return `M${mui}-${rand}`;
-    };
-
-    // 4. Tính tiền
-    document.getElementById('btn-calc').onclick = () => {
-        const v = vSelect.options[vSelect.selectedIndex];
-        const mui = parseInt(muiSelect.value);
-        const maxMui = parseInt(v.dataset.doses);
-        const price = parseFloat(v.dataset.price);
-        
-        // Kiểm tra mã nếu mũi > 1
-        if(mui > 1) {
-            if(!/^M\d-[A-Z0-9]{6}$/.test(document.getElementById('prev-code').value)) {
-                return alert("Mã mũi trước không hợp lệ!");
-            }
-        }
-
-        let discount = 0;
-        let reasons = [];
-        if(price > 2000000) { discount += price * 0.05; reasons.push("Giá gốc > 2tr (-5%)"); }
-        if(mui === maxMui && v.value !== 'cum') { discount += price * 0.05; reasons.push("Mũi cuối (-5%)"); }
-
-        const total = price - discount;
-        const resDiv = document.getElementById('result');
-        resDiv.classList.remove('hidden');
-        resDiv.innerHTML = `Đơn giá: ${price.toLocaleString()} VNĐ<br>Giảm: ${discount.toLocaleString()} VNĐ (${reasons.join(', ')})<br><b>Tổng: ${total.toLocaleString()} VNĐ</b><br>Mã lần này: ${genCode(mui)}`;
-        
-        if(mui < maxMui) resDiv.innerHTML += `<br>Dự kiến mũi sau: Cách 180 ngày.`;
-        else if(v.value === 'cum') resDiv.innerHTML += `<br>Lưu ý: Chích lại vào năm sau.`;
-        else resDiv.innerHTML += `<br><b>Chúc mừng hoàn tất liệu trình!</b>`;
-
-        document.getElementById('btn-submit').disabled = false;
-    };
-
+    
     document.getElementById('btn-submit').onclick = function() {
-   
+    // 1. Thu thập thông tin từ form
     const name = document.getElementById('name').value;
     const vaccine = document.getElementById('vaccine').value;
     const mui = document.getElementById('mui').value;
-    const total = "2.375.000 VNĐ"; 
+    const total = "2.375.000 VNĐ"; // Giả định giá trị từ kết quả tính toán
 
-
+    // 2. Chuyển đổi giao diện (Ẩn form, Hiện thông báo)
     document.getElementById('registration-form').style.display = 'none';
     const successScreen = document.getElementById('success-screen');
     successScreen.style.display = 'block';
 
-   
+    // 3. Hiển thị thông tin tóm tắt
     document.getElementById('confirmation-details').innerHTML = `
         Họ tên: ${name}<br>
         Vaccine: ${vaccine}<br>
@@ -125,7 +84,8 @@
         Tổng thanh toán: ${total}
     `;
 };
-    
+        
+    };
 </script>
 </body>
 </html>
