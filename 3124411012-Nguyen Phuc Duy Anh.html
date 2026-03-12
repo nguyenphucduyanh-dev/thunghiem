@@ -4,124 +4,128 @@
     <meta charset="UTF-8">
     <title>Đăng ký Tiêm chủng</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
-        .wrapper { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; border: 1px solid #ccc; }
-        .form-row { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-        .error { color: red; background: #ffe6e6; padding: 10px; margin-bottom: 15px; border: 1px solid red; display: none; }
-        .btn-main { width: 100%; padding: 12px; background: #007bff; color: white; border: none; cursor: pointer; margin-top: 10px; }
-        .btn-main:disabled { background: #ccc; cursor: not-allowed; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .box { max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ccc; }
         .hidden { display: none; }
-        .result { padding: 15px; background: #e9ecef; margin-top: 15px; border: 1px solid #dee2e6; }
+        .form-group { margin-bottom: 15px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; margin-top: 10px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .msg { padding: 10px; margin-top: 10px; border: 1px solid #ddd; background: #f9f9f9; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <h2>Thông tin tiêm chủng</h2>
-    <div id="personal-form">
-        <div class="form-row"><label>Họ và Tên (*)</label><input type="text" id="fullname"></div>
-        <div class="form-row"><label>Giới tính (*)</label>
-            <input type="radio" name="gender" value="Nam" checked> Nam 
-            <input type="radio" name="gender" value="Nữ"> Nữ
-        </div>
-        <div class="form-row"><label>Ngày sinh (*)</label><input type="date" id="dob"></div>
-        <div class="form-row"><label>CCCD (12 số) (*)</label><input type="text" id="cccd" maxlength="12"></div>
-        <div class="form-row"><label>SĐT (*)</label><input type="text" id="phone"></div>
+<div class="box" id="app">
+    <h3>Đăng ký Tiêm chủng</h3>
+    <div class="form-group">
+        Họ tên: <input type="text" id="name">
     </div>
-
-    <div id="error-msg" class="error"></div>
-
-    <div class="form-row">
-        <label>Loại Vaccine</label>
+    <div class="form-group">
+        Loại Vaccine: 
         <select id="vaccine">
-            <option value="">-- Chọn Vaccine --</option>
-            <option value="cum">Cúm mùa</option>
-            <option value="thuydau">Thủy đậu</option>
-            <option value="hpv">HPV</option>
+            <option value="">-- Chọn --</option>
+            <option value="cum" data-price="350000" data-doses="1">Cúm mùa</option>
+            <option value="thuydau" data-price="800000" data-doses="2">Thủy đậu</option>
+            <option value="hpv" data-price="2500000" data-doses="3">HPV - Gardasil 9</option>
         </select>
     </div>
-
-    <div id="vaccine-section" class="hidden">
-        <div class="form-row"><label>Đăng ký mũi</label><select id="mui"><option value="">-- Chọn Mũi --</option></select></div>
-        <div id="check-code-box" class="hidden"><label>Nhập mã mũi tiêm trước (9 ký tự)</label><input type="text" id="prev-code"></div>
-        <div class="form-row"><label>Ngày dự kiến tiêm</label><input type="date" id="date-inject"></div>
-        <button id="btn-calc" class="btn-main" disabled>Tính tiền thanh toán</button>
+    <div class="form-group">
+        Đăng ký mũi: <select id="mui" disabled><option>-- Chọn --</option></select>
     </div>
-
-    <div id="invoice-result" class="result hidden"></div>
-    <div class="form-row"><input type="checkbox" id="agree" disabled> Tôi đồng ý cung cấp thông tin</div>
-    <button id="btn-submit" class="btn-main" disabled>Gửi thông tin đăng ký</button>
+    <div id="check-area" class="hidden">
+        Mã mũi trước đó: <input type="text" id="prev-code" placeholder="VD: M1-A7BC97">
+    </div>
+    <div class="form-group">
+        Ngày dự kiến tiêm: <input type="date" id="date-inject" disabled>
+    </div>
+    <button id="btn-calc" disabled>Tính tiền thanh toán</button>
+    <div id="result" class="msg hidden"></div>
+    <button id="btn-submit" disabled>Gửi thông tin đăng ký</button>
 </div>
 
 <script>
-    const data = {
-        cum: { minAge: 3, doses: 1, price: 350000 },
-        thuydau: { minAge: 0, maxAge: 6, doses: 2, price: 800000 },
-        hpv: { price: 2500000, priceOver20: 2000000 }
-    };
-
-    function getAge(dateString) {
-        return new Date().getFullYear() - new Date(dateString).getFullYear();
-    }
-
+    const vSelect = document.getElementById('vaccine');
+    const muiSelect = document.getElementById('mui');
+    const dateInput = document.getElementById('date-inject');
+    const checkArea = document.getElementById('check-area');
     
-    document.getElementById('vaccine').onchange = function() {
-        const dob = document.getElementById('dob').value;
-        const age = getAge(dob);
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        const err = document.getElementById('error-msg');
-        const section = document.getElementById('vaccine-section');
-        const mui = document.getElementById('mui');
-
-        if(!dob) { alert("Vui lòng nhập ngày sinh!"); this.value=""; return; }
-
-        let isValid = false;
-        let count = 0;
-
-        if(this.value === 'cum' && age > 3) { isValid = true; count = 1; }
-        else if(this.value === 'thuydau' && age >= 0 && age <= 6) { isValid = true; count = 2; }
-        else if(this.value === 'hpv' && gender === 'Nữ') {
-            if(age >= 11 && age <= 20) { isValid = true; count = 2; }
-            else if(age > 20) { isValid = true; count = 3; }
-        }
-
-        if(isValid) {
-            err.style.display = 'none'; section.classList.remove('hidden');
-            mui.innerHTML = '<option value="">-- Chọn Mũi --</option>';
-            for(let i=1; i<=count; i++) mui.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
-        } else {
-            err.style.display = 'block'; err.innerText = "Lỗi: Không phù hợp độ tuổi/giới tính.";
-            section.classList.add('hidden');
+    // 1. Chọn Vaccine sinh Mũi
+    vSelect.onchange = () => {
+        const option = vSelect.options[vSelect.selectedIndex];
+        muiSelect.innerHTML = '<option value="">-- Chọn --</option>';
+        if(option.value) {
+            for(let i=1; i<=option.dataset.doses; i++) muiSelect.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
+            muiSelect.disabled = false;
         }
     };
 
-    
-    document.getElementById('mui').onchange = function() {
-        document.getElementById('check-code-box').classList.toggle('hidden', this.value == 1);
+    // 2. Chọn Mũi -> Xử lý hiển thị
+    muiSelect.onchange = () => {
+        dateInput.disabled = false;
+        checkArea.classList.toggle('hidden', muiSelect.value == 1);
         document.getElementById('btn-calc').disabled = false;
     };
 
-    
-    document.getElementById('btn-calc').onclick = function() {
-        const mui = document.getElementById('mui').value;
-        const type = document.getElementById('vaccine').value;
-        let price = (type === 'hpv' && getAge(document.getElementById('dob').value) > 20) ? 2000000 : (type === 'hpv' ? 2500000 : data[type].price);
-        let discount = (price > 2000000) ? price * 0.05 : 0;
-        
-        document.getElementById('invoice-result').classList.remove('hidden');
-        document.getElementById('invoice-result').innerHTML = `Đơn giá: ${price.toLocaleString()} VNĐ<br>Giảm giá: ${discount.toLocaleString()} VNĐ<br><b>Tổng: ${(price-discount).toLocaleString()} VNĐ</b>`;
-        document.getElementById('agree').disabled = false;
+    // 3. Hàm sinh mã ngẫu nhiên
+    const genCode = (mui) => {
+        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let rand = Array.from({length: 6}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+        return `M${mui}-${rand}`;
     };
 
-    document.getElementById('agree').onchange = function() {
-        document.getElementById('btn-submit').disabled = !this.checked;
+    // 4. Tính tiền
+    document.getElementById('btn-calc').onclick = () => {
+        const v = vSelect.options[vSelect.selectedIndex];
+        const mui = parseInt(muiSelect.value);
+        const maxMui = parseInt(v.dataset.doses);
+        const price = parseFloat(v.dataset.price);
+        
+        // Kiểm tra mã nếu mũi > 1
+        if(mui > 1) {
+            if(!/^M\d-[A-Z0-9]{6}$/.test(document.getElementById('prev-code').value)) {
+                return alert("Mã mũi trước không hợp lệ!");
+            }
+        }
+
+        let discount = 0;
+        let reasons = [];
+        if(price > 2000000) { discount += price * 0.05; reasons.push("Giá gốc > 2tr (-5%)"); }
+        if(mui === maxMui && v.value !== 'cum') { discount += price * 0.05; reasons.push("Mũi cuối (-5%)"); }
+
+        const total = price - discount;
+        const resDiv = document.getElementById('result');
+        resDiv.classList.remove('hidden');
+        resDiv.innerHTML = `Đơn giá: ${price.toLocaleString()} VNĐ<br>Giảm: ${discount.toLocaleString()} VNĐ (${reasons.join(', ')})<br><b>Tổng: ${total.toLocaleString()} VNĐ</b><br>Mã lần này: ${genCode(mui)}`;
+        
+        if(mui < maxMui) resDiv.innerHTML += `<br>Dự kiến mũi sau: Cách 180 ngày.`;
+        else if(v.value === 'cum') resDiv.innerHTML += `<br>Lưu ý: Chích lại vào năm sau.`;
+        else resDiv.innerHTML += `<br><b>Chúc mừng hoàn tất liệu trình!</b>`;
+
+        document.getElementById('btn-submit').disabled = false;
     };
 
     document.getElementById('btn-submit').onclick = function() {
-        alert("ĐĂNG KÝ THÀNH CÔNG!\nHọ tên: " + document.getElementById('fullname').value);
-    };
+   
+    const name = document.getElementById('name').value;
+    const vaccine = document.getElementById('vaccine').value;
+    const mui = document.getElementById('mui').value;
+    const total = "2.375.000 VNĐ"; 
+
+
+    document.getElementById('registration-form').style.display = 'none';
+    const successScreen = document.getElementById('success-screen');
+    successScreen.style.display = 'block';
+
+   
+    document.getElementById('confirmation-details').innerHTML = `
+        Họ tên: ${name}<br>
+        Vaccine: ${vaccine}<br>
+        Mũi tiêm: ${mui}<br>
+        Tổng thanh toán: ${total}
+    `;
+};
+    
 </script>
 </body>
 </html>
