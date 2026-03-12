@@ -2,65 +2,100 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ thống tiêm chủng</title>
+    <title>Đăng ký Tiêm chủng - Hệ thống Y tế Quốc gia</title>
     <style>
-        .section { display: none; padding: 20px; border: 1px solid #ccc; margin-top: 10px; }
-        .active { display: block; }
-        .container { max-width: 600px; margin: auto; }
-        button { margin-top: 10px; cursor: pointer; }
+        :root { --primary-color: #007bff; --border-color: #ced4da; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .wrapper { max-width: 900px; margin: auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        
+        fieldset { border: 1px solid var(--border-color); padding: 20px; margin-bottom: 25px; border-radius: 6px; }
+        legend { font-weight: bold; color: var(--primary-color); font-size: 1.2em; padding: 0 10px; }
+        
+        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-container { text-align: center; margin-top: 30px; }
+        button { padding: 12px 30px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:disabled { background-color: #adb5bd; cursor: not-allowed; }
+        
+        #priceTable { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        #priceTable th, #priceTable td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="section1" class="section active">
-        <h2>Phần 1: Thông tin cá nhân</h2>
-        <label>Họ và Tên:</label><input type="text" id="fullname">
-        <button onclick="showSection('section2')">Tiếp theo</button>
-    </div>
+<div class="wrapper">
+    <h1>PHIẾU ĐĂNG KÝ TIÊM CHỦNG</h1>
 
-    <div id="section2" class="section">
-        <h2>Phần 2: Thông tin tiêm chủng</h2>
-        <label>Loại Vaccine:</label>
-        <select id="vaccineType" onchange="updateDoses()">
-            <option value="">-- Chọn Vaccine --</option>
-            <option value="cum">Cúm mùa</option>
-            <option value="thuy-dau">Thủy đậu</option>
-        </select>
-        <br>
-        <label>Chọn mũi:</label>
-        <select id="doseSelect" disabled></select>
-        <br>
-        <button onclick="showSection('section1')">Quay lại</button>
-        <button onclick="showSection('section3')">Tính tiền</button>
-    </div>
+    <fieldset>
+        <legend>I. Thông tin cá nhân</legend>
+        <div class="form-row">
+            <div class="form-group"><label>Họ và Tên *</label><input type="text" id="fullname" placeholder="VD: Nguyễn Văn A"></div>
+            <div class="form-group"><label>Ngày sinh *</label><input type="date" id="dob"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Giới tính *</label>
+                <select id="gender"><option value="nam">Nam</option><option value="nu">Nữ</option></select>
+            </div>
+            <div class="form-group"><label>Số CCCD *</label><input type="text" id="cccd" placeholder="12 chữ số"></div>
+        </div>
+    </fieldset>
 
-    <div id="section3" class="section">
-        <h2>Phần 3: Thanh toán</h2>
-        <p>Tổng tiền: 800.000 VNĐ</p>
-        <input type="checkbox" id="agree"> Tôi đồng ý.
-        <br>
-        <button onclick="showSection('section2')">Quay lại</button>
-        <button id="submitBtn" disabled onclick="alert('Đăng ký thành công!')">Gửi</button>
+    <fieldset>
+        <legend>II. Thông tin tiêm chủng</legend>
+        <div class="form-row">
+            <div class="form-group"><label>Loại Vaccine *</label>
+                <select id="vaccineType">
+                    <option value="">-- Chọn Vaccine --</option>
+                    <option value="cum">Cúm mùa (350.000 VNĐ)</option>
+                    <option value="thuy-dau">Thủy đậu (800.000 VNĐ)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Số mũi tiêm *</label>
+                <select id="doseSelect" disabled><option>-- Chọn mũi --</option></select>
+            </div>
+        </div>
+        <button id="calcBtn" disabled>Tính tiền thanh toán</button>
+        <div id="priceResult"></div>
+    </fieldset>
+
+    <div class="btn-container">
+        <input type="checkbox" id="agree" disabled> <label style="display:inline;">Tôi cam đoan thông tin là chính xác</label><br>
+        <button id="submitBtn" disabled>Gửi Đăng Ký</button>
     </div>
 </div>
 
 <script>
+    const vaccineType = document.getElementById('vaccineType');
+    const doseSelect = document.getElementById('doseSelect');
+    const calcBtn = document.getElementById('calcBtn');
+    const agree = document.getElementById('agree');
+    const submitBtn = document.getElementById('submitBtn');
 
-    function showSection(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+    vaccineType.addEventListener('change', () => {
+        doseSelect.innerHTML = '<option value="">Chọn mũi</option><option value="1">Mũi 1</option><option value="2">Mũi 2</option>';
+        doseSelect.disabled = (vaccineType.value === "");
+    });
 
-    function updateDoses() {
-        const type = document.getElementById('vaccineType').value;
-        const select = document.getElementById('doseSelect');
-        select.innerHTML = '<option value="1">Mũi 1</option>' + (type === 'thuy-dau' ? '<option value="2">Mũi 2</option>' : '');
-        select.disabled = (type === "");
-    }
+    doseSelect.addEventListener('change', () => {
+        calcBtn.disabled = (doseSelect.value === "");
+    });
 
-    document.getElementById('agree').addEventListener('change', function() {
-        document.getElementById('submitBtn').disabled = !this.checked;
+    calcBtn.addEventListener('click', () => {
+        alert("Đã tính toán chi phí. Vui lòng xác nhận cam đoan!");
+        agree.disabled = false;
+    });
+
+
+    agree.addEventListener('change', () => {
+        submitBtn.disabled = !agree.checked;
+    });
+
+    submitBtn.addEventListener('click', () => {
+        alert("Gửi đăng ký thành công!");
     });
 </script>
 
