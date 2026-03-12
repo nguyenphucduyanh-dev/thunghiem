@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký tiêm chủng</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        .error { color: red; font-weight: bold; margin: 10px 0; }
+        .success { color: green; font-weight: bold; margin: 10px 0; }
+        .hidden { display: none; }
+        button { padding: 10px 20px; cursor: pointer; background-color: #ddd; border: none; }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
+        .summary { background: #f4f4f4; padding: 15px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Đăng ký tiêm chủng</h2>
+    <div id="form-main">
+        <div class="form-group">
+            <label>Họ và Tên (*)</label>
+            <input type="text" id="fullname" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="form-group">
+            <label>Giới tính (*)</label>
+            <input type="radio" name="gender" value="Nam" checked> Nam
+            <input type="radio" name="gender" value="Nữ"> Nữ
+        </div>
+        <div class="form-group">
+            <label>Ngày sinh (*)</label>
+            <input type="date" id="dob">
+        </div>
+        <div class="form-group">
+            <label>Số CCCD (12 số) (*)</label>
+            <input type="text" id="cccd" maxlength="12">
+        </div>
+        <div class="form-group">
+            <label>Số điện thoại (*)</label>
+            <input type="text" id="phone">
+        </div>
+
+        <hr>
+        <h3>II. Thông tin tiêm chủng</h3>
+        <div id="error-box" class="error"></div>
+        
+        <div class="form-group">
+            <label>Loại Vaccine</label>
+            <select id="vaccine">
+                <option value="">-- Chọn Vaccine --</option>
+                <option value="cum">Cúm mùa</option>
+                <option value="thuydau">Thủy đậu</option>
+                <option value="hpv">HPV</option>
+            </select>
+        </div>
+        
+        <div id="vaccine-details" class="hidden">
+            <div class="form-group">
+                <label>Đăng ký mũi</label>
+                <select id="mui"></select>
+            </div>
+            <div id="tra-soat" class="hidden">
+                <label>Nhập mã mũi tiêm trước đó (9 ký tự)</label>
+                <input type="text" id="prev-code" maxlength="9">
+            </div>
+            <div class="form-group">
+                <label>Ngày dự kiến tiêm</label>
+                <input type="date" id="date-inject">
+            </div>
+            <button id="btn-calc">Tính tiền thanh toán</button>
+        </div>
+
+        <div id="invoice" class="summary hidden"></div>
+        <div class="form-group">
+            <input type="checkbox" id="agree" disabled> Tôi đồng ý cung cấp thông tin cho việc tiêm chủng
+        </div>
+        <button id="btn-submit" disabled>Gửi thông tin đăng ký</button>
+    </div>
+</div>
+
+<script>
+  
+    const config = {
+        cum: { minAge: 3, doses: 1, price: 350000 },
+        thuydau: { minAge: 0, maxAge: 6, doses: 2, interval: 30, price: 800000 },
+        hpv: { 
+            price: 2500000, 
+            getRules: (age, gender) => {
+                if (gender !== 'Nữ') return null;
+                return age >= 11 && age <= 20 ? {doses: 2, interval: 180, price: 2500000} : 
+                       age > 20 ? {doses: 3, interval: 90, price: 2000000} : null;
+            }
+        }
+    };
+
+   
+    const dobInput = document.getElementById('dob');
+    const vacSelect = document.getElementById('vaccine');
+    const muiSelect = document.getElementById('mui');
+    const errorBox = document.getElementById('error-box');
+
+    
+    function getAge(dob) {
+        return new Date().getFullYear() - new Date(dob).getFullYear();
+    }
+
+   
+    vacSelect.onchange = () => {
+        const age = getAge(dobInput.value);
+        const type = vacSelect.value;
+        const gender = document.querySelector('input[name="gender"]:checked').value;
+        
+        errorBox.textContent = "";
+        document.getElementById('vaccine-details').classList.remove('hidden');
+
+        let valid = false;
+        if(type === 'cum' && age > 3) valid = true;
+        if(type === 'thuydau' && age >= 0 && age <= 6) valid = true;
+        if(type === 'hpv') {
+            const rule = config.hpv.getRules(age, gender);
+            if(rule) valid = true;
+        }
+
+        if(!valid) {
+            errorBox.textContent = "Lỗi: Khách hàng không phù hợp tuổi hoặc giới tính cho vaccine này.";
+            document.getElementById('vaccine-details').classList.add('hidden');
+        } else {
+            // Render mũi... (giản lược để khớp logic yêu cầu)
+        }
+    };
+    
+
+    document.getElementById('btn-submit').onclick = () => {
+        alert("ĐĂNG KÝ THÀNH CÔNG!\nThông tin: " + document.getElementById('fullname').value);
+    };
+</script>
+
+</body>
+</html>
