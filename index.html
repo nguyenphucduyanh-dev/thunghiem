@@ -60,23 +60,36 @@
 </div>
 
 <script>
-    const vaccineSelect = document.getElementById('vaccineType');
-    const doseSelect = document.getElementById('doseNum');
+    const vaccineType = document.getElementById('vaccineType');
+    const doseNum = document.getElementById('doseNum');
     const calcBtn = document.getElementById('calcBtn');
+    const confirmCheck = document.getElementById('confirmCheck');
+    const submitBtn = document.getElementById('submitBtn');
 
-    vaccineSelect.addEventListener('change', function() {
-        doseSelect.disabled = false;
-        doseSelect.innerHTML = '<option value="1">Mũi 1</option><option value="2">Mũi 2</option>';
+    
+    vaccineType.addEventListener('change', () => {
+        doseNum.disabled = false;
+        calcBtn.disabled = true;
+        submitBtn.disabled = true;
     });
 
-    doseSelect.addEventListener('change', () => {
+    doseNum.addEventListener('change', () => {
         calcBtn.disabled = false;
     });
 
     calcBtn.addEventListener('click', () => {
-        alert("Đang tính toán chi phí...");
-        document.getElementById('confirmCheck').disabled = false;
-        document.getElementById('submitBtn').disabled = false;
+        confirmCheck.disabled = false;
+        alert("Đã tính tiền thành công. Vui lòng xác nhận cam đoan để gửi!");
+    });
+
+    confirmCheck.addEventListener('change', () => {
+        submitBtn.disabled = !confirmCheck.checked;
+    });
+
+    submitBtn.addEventListener('click', () => {
+        if(!submitBtn.disabled) {
+            alert("Chúc mừng! Thông tin của bạn đã được gửi hệ thống.");
+        }
     });
 </script>
 
