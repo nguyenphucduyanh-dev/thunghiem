@@ -62,33 +62,33 @@
 <script>
     const vaccineType = document.getElementById('vaccineType');
     const doseNum = document.getElementById('doseNum');
-    const calcBtn = document.getElementById('calcBtn');
-    const confirmCheck = document.getElementById('confirmCheck');
-    const submitBtn = document.getElementById('submitBtn');
 
+
+    const doseData = {
+        'cum': ['Mũi 1'],
+        'thuy-dau': ['Mũi 1', 'Mũi 2'],
+        'hpv': ['Mũi 1', 'Mũi 2', 'Mũi 3']
+    };
+
+    vaccineType.addEventListener('change', function() {
+        const selectedVaccine = this.value;
+  
+        doseNum.innerHTML = '<option value="">-- Chọn Mũi --</option>';
+        
+        if (selectedVaccine && doseData[selectedVaccine]) {
     
-    vaccineType.addEventListener('change', () => {
-        doseNum.disabled = false;
-        calcBtn.disabled = true;
-        submitBtn.disabled = true;
-    });
+            doseNum.disabled = false;
+            
 
-    doseNum.addEventListener('change', () => {
-        calcBtn.disabled = false;
-    });
-
-    calcBtn.addEventListener('click', () => {
-        confirmCheck.disabled = false;
-        alert("Đã tính tiền thành công. Vui lòng xác nhận cam đoan để gửi!");
-    });
-
-    confirmCheck.addEventListener('change', () => {
-        submitBtn.disabled = !confirmCheck.checked;
-    });
-
-    submitBtn.addEventListener('click', () => {
-        if(!submitBtn.disabled) {
-            alert("Chúc mừng! Thông tin của bạn đã được gửi hệ thống.");
+            doseData[selectedVaccine].forEach((dose, index) => {
+                let option = document.createElement('option');
+                option.value = index + 1;
+                option.text = dose;
+                doseNum.appendChild(option);
+            });
+        } else {
+   
+            doseNum.disabled = true;
         }
     });
 </script>
