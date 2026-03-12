@@ -2,90 +2,82 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng ký tiêm chủng</title>
+    <title>Đăng ký Tiêm chủng</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
-        .wrapper { max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ccc; }
-        .form-group { margin-bottom: 15px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; margin-top: 10px; cursor: pointer; }
-        button:disabled { background: #ccc; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ddd; }
         .hidden { display: none; }
-        .msg { padding: 10px; margin-top: 10px; background: #e9ecef; border: 1px solid #dee2e6; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; cursor: pointer; margin-top: 10px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #success-screen { padding: 20px; background: #d4edda; border: 1px solid #c3e6cb; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="wrapper" id="form-container">
+<div class="container" id="form-screen">
     <h2>I. Thông tin cá nhân</h2>
-    <div class="form-group">Họ và Tên: * <input type="text" id="fullname"></div>
+    <div class="form-group"><label>Họ và tên (*)</label><input type="text" id="fullname"></div>
+    <div class="form-group"><label>Giới tính</label><input type="radio" name="gender" value="Nam" checked> Nam <input type="radio" name="gender" value="Nữ"> Nữ</div>
+    <div class="form-group"><label>Ngày sinh (*)</label><input type="date" id="dob"></div>
+    <div class="form-group"><label>Nơi sinh (*)</label><input type="text" id="birthplace" placeholder="Tỉnh/Thành phố"></div>
+    <div class="form-group"><label>CCCD (12 số) (*)</label><input type="text" id="cccd" maxlength="12" placeholder="Nhập đúng 12 số"></div>
+    <div class="form-group"><label>Số điện thoại (*)</label><input type="tel" id="phone" placeholder="09xxxx hoặc 03xxxx..."></div>
+
     <h2>II. Thông tin tiêm chủng</h2>
     <div class="form-group">
-        Loại Vaccine: 
+        <label>Loại Vaccine</label>
         <select id="vaccine">
             <option value="">-- Chọn Vaccine --</option>
-            <option value="cum" data-type="dinhky">Cúm mùa</option>
-            <option value="hpv" data-type="lieutrinh" data-doses="3">HPV - Gardasil 9</option>
+            <option value="cum" data-price="350000" data-doses="1">Cúm mùa (1 Mũi/Năm)</option>
+            <option value="thuydau" data-price="800000" data-doses="2">Thủy đậu (2 Mũi)</option>
+            <option value="hpv" data-price="2500000" data-doses="3">HPV - Gardasil 9 (3 Mũi)</option>
         </select>
     </div>
-    <div class="form-group">Đăng ký mũi: <select id="mui" disabled><option>-- Chọn Mũi --</option></select></div>
-    <div class="form-group">Ngày dự kiến tiêm: <input type="date" id="date-inject" disabled></div>
+    <div class="form-group"><label>Đăng ký mũi</label><select id="mui" disabled><option>-- Chọn Mũi --</option></select></div>
+    <div id="prev-code-area" class="hidden"><label>Mã mũi trước đó</label><input type="text" id="prev-code" placeholder="M(số mũi)-XXXXXX"></div>
+    <div class="form-group"><label>Ngày dự kiến tiêm</label><input type="date" id="inject-date" disabled></div>
     
-    <div id="check-code" class="hidden">
-        Nhập mã mũi tiêm trước đó: <input type="text" id="prev-code" placeholder="VD: M1-ABCDEF">
-    </div>
+    <button id="btn-calc">Tính tiền thanh toán</button>
+    <div id="result-area" style="margin: 10px 0; padding: 10px; border: 1px dashed #aaa;"></div>
+    
+    <div class="form-group"><input type="checkbox" id="agree"> Tôi đồng ý cung cấp thông tin</div>
+    <button id="btn-submit">Gửi thông tin đăng ký</button>
+</div>
 
-    <button id="btn-price" disabled>Tính tiền thanh toán</button>
-    <div id="price-result" class="msg hidden"></div>
-    
-    <div class="form-group"><input type="checkbox" id="confirm"> Tôi đồng ý cung cấp thông tin</div>
-    <button id="btn-submit" disabled>Gửi thông tin đăng ký</button>
+<div class="container hidden" id="success-screen">
+    <h2 style="color: green;">ĐĂNG KÝ THÀNH CÔNG!</h2>
+    <p id="summary-info"></p>
+    <button onclick="location.reload()">Đăng ký tiếp</button>
 </div>
 
 <script>
-    const vSelect = document.getElementById('vaccine');
-    const muiSelect = document.getElementById('mui');
-    const dateInput = document.getElementById('date-inject');
-
-    // 1. Logic chọn Vaccine
-    vSelect.onchange = () => {
-        muiSelect.disabled = !vSelect.value;
-        muiSelect.innerHTML = '<option>-- Chọn Mũi --</option>';
-        if(vSelect.value === 'hpv') {
-            for(let i=1; i<=3; i++) muiSelect.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
-        }
-    };
-
     
-    muiSelect.onchange = () => {
-        dateInput.disabled = false;
-        document.getElementById('check-code').classList.toggle('hidden', muiSelect.value == 1);
-        document.getElementById('btn-price').disabled = false;
+    const validatePersonal = () => {
+        const cccd = document.getElementById('cccd').value;
+        const phone = document.getElementById('phone').value;
+        if(cccd.length !== 12 || isNaN(cccd)) { alert("CCCD phải đủ 12 chữ số!"); return false; }
+        if(phone.length < 10) { alert("Số điện thoại không hợp lệ!"); return false; }
+        return true;
     };
 
     
     document.getElementById('btn-submit').onclick = function() {
-    // 1. Thu thập thông tin từ form
-    const name = document.getElementById('name').value;
-    const vaccine = document.getElementById('vaccine').value;
-    const mui = document.getElementById('mui').value;
-    const total = "2.375.000 VNĐ"; // Giả định giá trị từ kết quả tính toán
-
-    // 2. Chuyển đổi giao diện (Ẩn form, Hiện thông báo)
-    document.getElementById('registration-form').style.display = 'none';
-    const successScreen = document.getElementById('success-screen');
-    successScreen.style.display = 'block';
-
-    // 3. Hiển thị thông tin tóm tắt
-    document.getElementById('confirmation-details').innerHTML = `
-        Họ tên: ${name}<br>
-        Vaccine: ${vaccine}<br>
-        Mũi tiêm: ${mui}<br>
-        Tổng thanh toán: ${total}
-    `;
-};
+        if(!validatePersonal()) return;
+        if(!document.getElementById('agree').checked) return alert("Vui lòng đồng ý điều khoản!");
         
+        document.getElementById('form-screen').classList.add('hidden');
+        document.getElementById('success-screen').classList.remove('hidden');
+        document.getElementById('summary-info').innerHTML = `
+            Họ tên: ${document.getElementById('fullname').value}<br>
+            Nơi sinh: ${document.getElementById('birthplace').value}<br>
+            Vaccine: ${document.getElementById('vaccine').options[document.getElementById('vaccine').selectedIndex].text}<br>
+            Tổng tiền: ${document.getElementById('result-area').querySelector('b')?.innerText || 'Chưa tính'}`;
     };
+    
+    
 </script>
 </body>
 </html>
