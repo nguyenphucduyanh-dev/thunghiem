@@ -5,64 +5,68 @@
     <title>Hệ thống Đăng ký Tiêm chủng</title>
     <style>
         :root { --blue: #0056b3; --green: #28a745; --red: #dc3545; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; padding: 20px; line-height: 1.6; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
         .box { max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h2 { color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 10px; text-transform: uppercase; font-size: 1.3rem; }
-        .form-group { margin-bottom: 15px; }
+        h2 { color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 10px; font-size: 1.2rem; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        input.error { border-color: var(--red); background: #fff8f8; }
+        .error-text { color: var(--red); font-size: 0.8rem; display: none; margin-top: 4px; }
         .date-row { display: flex; gap: 10px; }
         .hidden { display: none; }
         .btn-row { display: flex; gap: 10px; margin-top: 20px; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; font-size: 1rem; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
         #btn-calc { background: var(--green); }
         #btn-submit { background: var(--blue); }
         button:disabled { background: #ccc !important; cursor: not-allowed; }
-        .result-panel { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; margin-top: 20px; border-radius: 8px; }
+        .invoice { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; margin-top: 20px; border-radius: 8px; }
         .success-ui { text-align: center; padding: 40px; }
-        .success-ui h1 { color: var(--green); font-size: 2.5rem; margin-bottom: 10px; }
-        .summary-box { text-align: left; background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 10px; margin: 20px 0; }
-        .error-hint { color: var(--red); font-size: 0.8rem; margin-top: 4px; display: none; }
+        .success-ui h1 { color: var(--green); font-size: 3rem; margin: 0; }
+        .summary { text-align: left; background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="box" id="main-container">
+<div class="box" id="container">
     <div id="registration-form">
-        <h2>I. Thông tin cá nhân</h2>
+        <h2>I. THÔNG TIN CÁ NHÂN</h2>
         
         <div class="form-group">
             <label>Họ và Tên (*)</label>
-            <input type="text" id="fullname" placeholder="VD: Nguyen Van A">
-            <div class="error-hint" id="err-name">Họ tên không được có số hay ký tự đặc biệt!</div>
+            <input type="text" id="fullname" placeholder="Chỉ nhập chữ và khoảng trắng">
+            <div class="error-text" id="err-name">Họ tên không được chứa số hoặc ký tự đặc biệt!</div>
         </div>
 
         <div class="form-group">
-            <label>Ngày tháng năm sinh (Ngày/Tháng/Năm) (*)</label>
+            <label>Ngày tháng năm sinh (*)</label>
             <div class="date-row">
                 <input type="number" id="day" placeholder="Ngày">
                 <input type="number" id="month" placeholder="Tháng">
                 <input type="number" id="year" placeholder="Năm">
             </div>
-            <div class="error-hint" id="err-date">Ngày sinh không tồn tại (kiểm tra lại tháng hoặc năm nhuận)!</div>
+            <div class="error-text" id="err-date">Ngày sinh không hợp lệ hoặc không tồn tại (kiểm tra năm nhuận)!</div>
         </div>
 
         <div class="form-group">
-            <label>CCCD (12 số) (*)</label>
-            <input type="text" id="cccd" maxlength="12" placeholder="Chỉ nhập 12 chữ số">
-            <div class="error-hint" id="err-cccd">CCCD phải đúng 12 chữ số!</div>
+            <label>CCCD (Đúng 12 số) (*)</label>
+            <input type="text" id="cccd" maxlength="12" placeholder="Nhập 12 chữ số">
+            <div class="error-text" id="err-cccd">CCCD phải có đúng 12 chữ số và không chứa ký tự khác!</div>
         </div>
 
         <div class="form-group">
-            <label>Nơi sinh & Số điện thoại (*)</label>
-            <div class="date-row">
-                <input type="text" id="birthplace" placeholder="Nơi sinh" style="flex:2">
-                <input type="text" id="phone" placeholder="Số điện thoại" style="flex:1">
-            </div>
-            <div class="error-hint" id="err-phone">SĐT/Nơi sinh không hợp lệ (kiểm tra lại)!</div>
+            <label>Nơi sinh (*)</label>
+            <input type="text" id="birthplace" placeholder="Tỉnh/Thành phố">
+            <div class="error-text" id="err-place">Nơi sinh không chứa số hoặc ký tự đặc biệt!</div>
         </div>
 
-        <h2>II. Thông tin tiêm chủng</h2>
+        <div class="form-group">
+            <label>Số điện thoại (>= 10 số) (*)</label>
+            <input type="text" id="phone" placeholder="Chỉ nhập số">
+            <div class="error-text" id="err-phone">SĐT phải có ít nhất 10 số và không chứa chữ cái!</div>
+        </div>
+
+        <h2>II. THÔNG TIN TIÊM CHỦNG</h2>
         <div class="form-group">
             <label>Loại Vaccine</label>
             <select id="vaccine">
@@ -73,43 +77,42 @@
             </select>
         </div>
 
-        <div id="vaccine-logic" class="hidden">
+        <div id="extra-info" class="hidden">
             <div class="form-group">
                 <label>Đăng ký mũi thứ</label>
                 <select id="mui"></select>
             </div>
-            <div id="tra-soat-box" class="hidden">
-                <label style="color:var(--red)">Mã mũi tiêm trước (M[số]-6 ký tự) (*)</label>
+            <div id="prev-code-area" class="hidden">
+                <label style="color:var(--red)">Nhập mã mũi tiêm trước (*)</label>
                 <input type="text" id="prev-code" placeholder="VD: M1-A7BC97">
             </div>
             <div class="form-group">
                 <label>Ngày dự kiến tiêm</label>
                 <input type="date" id="date-inject">
             </div>
-            
             <div class="btn-row">
                 <button id="btn-calc" disabled>Tính tiền thanh toán</button>
                 <button id="btn-submit" disabled>Gửi thông tin đăng ký</button>
             </div>
         </div>
 
-        <div id="bill-area" class="result-panel hidden"></div>
-        <div class="form-group" style="margin-top:15px">
-            <input type="checkbox" id="agree" style="width:auto"> Tôi đồng ý cung cấp thông tin.
+        <div id="invoice-box" class="invoice hidden"></div>
+        <div style="margin-top: 15px;">
+            <input type="checkbox" id="agree" style="width: auto;"> Tôi đồng ý với các điều khoản.
         </div>
     </div>
 
     <div id="success-screen" class="success-ui hidden">
         <h1>✓ SUCCESS</h1>
         <p style="font-size: 1.2rem; font-weight: bold;">ĐĂNG KÝ TIÊM CHỦNG THÀNH CÔNG!</p>
-        <div class="summary-box" id="final-summary"></div>
-        <button onclick="location.reload()" style="background: #6c757d; width: 200px;">Quay lại</button>
+        <div class="summary" id="summary-content"></div>
+        <button onclick="location.reload()" style="background: #6c757d; width: 200px; margin-top: 20px;">Quay lại</button>
     </div>
 </div>
 
 <script>
-    // 1. Logic Kiểm tra thông tin cá nhân (Regex & Ngày tháng)
-    function validateEverything() {
+    // --- HÀM VALIDATE CHÍNH ---
+    function checkValidation() {
         const name = document.getElementById('fullname').value;
         const cccd = document.getElementById('cccd').value;
         const place = document.getElementById('birthplace').value;
@@ -121,18 +124,17 @@
         const textRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
         const numRegex = /^\d+$/;
 
-        let valid = true;
+        let pass = true;
 
-        if(!textRegex.test(name)) { document.getElementById('err-name').style.display='block'; valid=false; }
-        else document.getElementById('err-name').style.display='none';
+        // Validate Tên & Nơi sinh
+        if(!textRegex.test(name)) { document.getElementById('err-name').style.display='block'; pass=false; } else document.getElementById('err-name').style.display='none';
+        if(!textRegex.test(place)) { document.getElementById('err-place').style.display='block'; pass=false; } else document.getElementById('err-place').style.display='none';
 
-        if(cccd.length !== 12 || !numRegex.test(cccd)) { document.getElementById('err-cccd').style.display='block'; valid=false; }
-        else document.getElementById('err-cccd').style.display='none';
+        // Validate CCCD (12 số) & SĐT (>=10 số)
+        if(cccd.length !== 12 || !numRegex.test(cccd)) { document.getElementById('err-cccd').style.display='block'; pass=false; } else document.getElementById('err-cccd').style.display='none';
+        if(phone.length < 10 || !numRegex.test(phone)) { document.getElementById('err-phone').style.display='block'; pass=false; } else document.getElementById('err-phone').style.display='none';
 
-        if(!textRegex.test(place) || phone.length < 10 || !numRegex.test(phone)) { document.getElementById('err-phone').style.display='block'; valid=false; }
-        else document.getElementById('err-phone').style.display='none';
-
-        // Logic ngày tháng năm nhuận
+        // Validate Ngày tháng năm nhuận
         let dateOk = true;
         if(isNaN(d) || isNaN(m) || isNaN(y) || d<=0 || m<=0 || m>12 || y<=0) dateOk = false;
         else {
@@ -140,20 +142,31 @@
             if ((y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0)) limit[2] = 29;
             if (d > limit[m]) dateOk = false;
         }
+        if(!dateOk) { document.getElementById('err-date').style.display='block'; pass=false; } else document.getElementById('err-date').style.display='none';
 
-        if(!dateOk) { document.getElementById('err-date').style.display='block'; valid=false; }
-        else document.getElementById('err-date').style.display='none';
+        // Nếu thông tin không hợp lệ, khóa nút Gửi ngay lập tức
+        if(!pass) {
+            document.getElementById('btn-submit').disabled = true;
+            document.getElementById('btn-calc').disabled = true;
+        }
 
-        return valid;
+        return pass;
     }
 
-    // 2. Logic Vaccine & Mũi
+    // Lắng nghe sự kiện thay đổi trên tất cả các input để kiểm tra liên tục
+    const inputs = ['fullname', 'day', 'month', 'year', 'cccd', 'birthplace', 'phone'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', checkValidation);
+    });
+
+    // --- XỬ LÝ VACCINE ---
     document.getElementById('vaccine').onchange = function() {
-        if(!validateEverything()) { this.value = ""; return; }
-        const age = 2026 - parseInt(document.getElementById('year').value); // Giả định năm hiện tại 2026
+        if(!checkValidation()) { alert("Vui lòng sửa thông tin cá nhân bị lỗi trước!"); this.value=""; return; }
+        
+        const age = 2026 - parseInt(document.getElementById('year').value);
         const type = this.value;
+        const extra = document.getElementById('extra-info');
         const mui = document.getElementById('mui');
-        const logic = document.getElementById('vaccine-logic');
 
         let doses = 0;
         if(type === 'cum' && age >= 3) doses = 1;
@@ -161,81 +174,64 @@
         else if(type === 'hpv' && age >= 11) doses = (age <= 20) ? 2 : 3;
 
         if(doses > 0) {
-            logic.classList.remove('hidden');
+            extra.classList.remove('hidden');
             mui.innerHTML = '<option value="">-- Chọn Mũi --</option>';
             for(let i=1; i<=doses; i++) mui.innerHTML += `<option value="${i}">Mũi ${i}</option>`;
         } else {
             alert("Độ tuổi không phù hợp!");
-            logic.classList.add('hidden');
+            extra.classList.add('hidden');
             this.value = "";
         }
     };
 
     document.getElementById('mui').onchange = function() {
-        document.getElementById('tra-soat-box').classList.toggle('hidden', this.value == 1);
+        document.getElementById('prev-code-area').classList.toggle('hidden', this.value == 1);
         document.getElementById('btn-calc').disabled = false;
         document.getElementById('btn-submit').disabled = false;
     };
 
-    // 3. Tính tiền & Sinh mã
+    // --- TÍNH TIỀN ---
     document.getElementById('btn-calc').onclick = function() {
+        if(!checkValidation()) return;
+
         const v = document.getElementById('vaccine');
         const opt = v.options[v.selectedIndex];
         const mui = parseInt(document.getElementById('mui').value);
         const maxMui = parseInt(opt.dataset.d);
-        let price = parseFloat(opt.dataset.p);
-
-        // Logic HPV theo tuổi
         const age = 2026 - parseInt(document.getElementById('year').value);
+        
+        let price = parseFloat(opt.dataset.p);
         if(v.value === 'hpv' && age > 20) price = 2000000;
 
         let discount = 0;
-        let note = "";
-        if(price > 2000000) { discount += price * 0.05; note += "Giảm 5% (>2tr). "; }
-        if(mui === maxMui && v.value !== 'cum') { discount += price * 0.05; note += "Giảm 5% mũi cuối."; }
+        if(price > 2000000) discount += price * 0.05;
+        if(mui === maxMui && v.value !== 'cum') discount += price * 0.05;
 
         const total = price - discount;
-        const newCode = `M${mui}-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
-
-        const bill = document.getElementById('bill-area');
+        const bill = document.getElementById('invoice-box');
         bill.classList.remove('hidden');
-        bill.innerHTML = `
-            <strong>HÓA ĐƠN:</strong><br>
-            - Đơn giá: ${price.toLocaleString()}đ | Giảm: ${discount.toLocaleString()}đ<br>
-            - Lý do: ${note || "Không"}<br>
-            <hr>
-            <b style="color:var(--red)">TỔNG CẦN CHI: ${total.toLocaleString()} VNĐ</b><br>
-            <span style="color:blue">Mã tiêm mới của bạn: ${newCode}</span><br>
-            <i>${mui < maxMui ? "Hẹn mũi tiếp theo sau 6 tháng." : (v.value === 'cum' ? "Lưu ý chích lại vào năm sau." : "Chúc mừng hoàn tất liệu trình!")}</i>
-        `;
+        bill.innerHTML = `<b>Tổng thanh toán dự kiến: ${total.toLocaleString()} VNĐ</b><br>Mã tiêm mới: M${mui}-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
     };
 
-    // 4. Gửi & Chuyển giao diện (Xử lý giống hình mẫu)
+    // --- GỬI ĐĂNG KÝ ---
     document.getElementById('btn-submit').onclick = function() {
-        if(!document.getElementById('agree').checked) { alert("Vui lòng đồng ý điều khoản!"); return; }
-        if(document.getElementById('mui').value > 1 && !/^M\d-[A-Z0-9]{6}$/.test(document.getElementById('prev-code').value.toUpperCase())) {
-            alert("Mã mũi tiêm trước không đúng định dạng!"); return;
-        }
+        // Kiểm tra cuối cùng trước khi cho phép "Thành công"
+        if(!checkValidation()) { alert("Thông tin hiện tại không hợp lệ. Đăng ký thất bại!"); return; }
+        if(!document.getElementById('agree').checked) { alert("Bạn chưa đồng ý điều khoản!"); return; }
 
-        // Ẩn form, hiện màn hình thành công
         document.getElementById('registration-form').classList.add('hidden');
         document.getElementById('success-screen').classList.remove('hidden');
 
-        // Điền tóm tắt
-        const name = document.getElementById('fullname').value;
-        const vac = document.getElementById('vaccine').options[document.getElementById('vaccine').selectedIndex].text;
-        const muiNo = document.getElementById('mui').value;
-        const billVal = document.getElementById('bill-area').querySelector('b').innerText;
-
-        document.getElementById('final-summary').innerHTML = `
-            <p><b>Họ và tên:</b> ${name}</p>
-            <p><b>Vaccine:</b> ${vac}</p>
-            <p><b>Đăng ký:</b> Mũi thứ ${muiNo}</p>
-            <p><b>Ngày hẹn:</b> ${document.getElementById('date-inject').value || "Chưa chọn"}</p>
-            <p style="border-top: 1px solid #eee; padding-top:10px"><b>${billVal}</b></p>
+        const summary = `
+            <p><b>Họ và tên:</b> ${document.getElementById('fullname').value}</p>
+            <p><b>CCCD:</b> ${document.getElementById('cccd').value}</p>
+            <p><b>Vaccine:</b> ${document.getElementById('vaccine').options[document.getElementById('vaccine').selectedIndex].text}</p>
+            <p><b>Mũi đăng ký:</b> Mũi số ${document.getElementById('mui').value}</p>
+            <p><b>Ngày hẹn:</b> ${document.getElementById('date-inject').value}</p>
+            <p style="color:var(--red); font-size:1.2rem"><b>${document.getElementById('invoice-box').querySelector('b').innerText}</b></p>
         `;
+        document.getElementById('summary-content').innerHTML = summary;
     };
 </script>
-
 </body>
 </html>
